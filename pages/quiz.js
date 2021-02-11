@@ -26,6 +26,10 @@ function LoadingWidget() {
 
 function QuestionWidget({ question, totalQuestions, questionIndex, onSubmit }) {
   const questionId = `question_${questionIndex}`;
+  const [isQuestionSubmited, setIsQuestionSubmited] = React.useState(false);
+  const [selectedAlternative, setSelectedAlternative] = React.useState(undefined);
+  const isCorrect = selectedAlternative === question.answer;
+  const hasAlternativeSelected = selectedAlternative !== undefined;
 
   return (
     <Widget>
@@ -56,7 +60,11 @@ function QuestionWidget({ question, totalQuestions, questionIndex, onSubmit }) {
         <form 
           onSubmit={(infosDoEvento) => {
             infosDoEvento.preventDefault();
-            onSubmit();
+            setIsQuestionSubmited(true);
+            setTimeout(() => {
+              onSubmit();
+              setIsQuestionSubmited(false);
+            }, 1500);
           }}
         >
           {question.alternatives.map((alternative, alternativeIndex) => {
@@ -64,27 +72,33 @@ function QuestionWidget({ question, totalQuestions, questionIndex, onSubmit }) {
             return (
               <Widget.Topic 
                 as="label"
+                key={alternativeId}
                 htmlFor={alternativeId}
               >
                 <input 
-                  style={{display: 'none'}}
+                  // style={{display: 'none'}}
                   id={alternativeId}
                   name={questionId}
+                  onChange={() => setSelectedAlternative(alternativeIndex)}
                   type="radio"
                 />
                 {alternative}
               </Widget.Topic>
-            )
+            );
           })}
+
+          <Button type="submit" disabled={!hasAlternativeSelected}>
+            Confirmar
+          </Button>
+
+          {isQuestionSubmited && isCorrect && <p>Você acertou!</p>}
+          {isQuestionSubmited && !isCorrect && <p>Você errou!</p>}
+
         </form>
 
         {/* <pre>
           {JSON.stringify(question, null, 4)}
         </pre> */}
-       
-        <Button type="submit">
-          Confirmar
-        </Button>
       </Widget.Content>
     </Widget>
   );
